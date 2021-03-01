@@ -1,0 +1,15 @@
+{
+  "name": "update-leaderboard-scores",
+  "version": "1.0.0",
+  "description": "aggiornare gli score nel db da fine partita multiplayer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "jwt-decode": "^3.1.2",
+    "mysql": "^2.18.1"
+  }
+}
