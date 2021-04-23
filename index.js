@@ -10,22 +10,22 @@ const pool = mysql.createPool({
 });
 
 exports.handler =  (event, context, callback) => {
-    let {score} = JSON.parse(event.body)
+    let {defeated} = JSON.parse(event.body)
     const { "cognito:username": username } = jwt_decode(event.headers["Authorization"]);
     context.callbackWaitsForEmptyEventLoop = false;
 	pool.getConnection((err, con) => {
         const response = {}
-        if(!err && /^[0-9]*$/.test(score) && score < 2147483647){
+        if(!err && /^[0-9]*$/.test(defeated)){
             response.body = []
             var sql = "";
            
             response.body.push("inserendo "+ username)
             sql += `
-    			replace into buffer(username, duration, score) 
-    			select tmp.username,  coalesce(b.duration, 0), if(b.score > tmp.score , b.score, tmp.score) score
-    			from buffer b right join (SELECT ? as username, ? as score) tmp on b.username = tmp.username 
+    			replace into buffer(username, score, defeated) 
+    			select tmp.username,  coalesce(b.score, 0), coalesce(b.defeated,0)+tmp.defeated defeated
+    			from buffer b right join (SELECT ? as username, ? as defeated) tmp on b.username = tmp.username 
     			where tmp.username = ?;`;
-    		var values = [username, score, username]
+    		var values = [username, defeated, username]
             con.query(sql, values, function(error, results){
                 if(error) {
                     callback(null, {
@@ -37,7 +37,7 @@ exports.handler =  (event, context, callback) => {
                 } else {
             		response.statusCode = 200;
                     response.body = JSON.stringify({
-                        message: "Update successful"
+                        message: "Update successful multi-player"
                     })
                     callback(null, response);
                 }
@@ -46,7 +46,7 @@ exports.handler =  (event, context, callback) => {
         } else {
             response.statusCode = 401
             response.body = JSON.stringify({
-                message: "score must be a positive integer value without sign less than 2147483647... or the connection to the DB is failed"
+                message: "score must be a integer value... or the connection to the DB is failed"
             })
             callback(null, response);
         }
